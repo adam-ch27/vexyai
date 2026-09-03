@@ -131,7 +131,7 @@ function Chat() {
 
   const retry = (turn: Turn) => {
     setTurns((current) =>
-      current.map((item) => (item === turn ? { ...item, result: undefined, failed: false } : item)),
+      current.map((item) => (item === turn ? { request: item.request, format: item.format, failed: false } : item)),
     );
     generate.mutate({ lesson: turn.request, format: turn.format });
   };
@@ -406,12 +406,12 @@ function ConversationTurn({
 function Result({ result }: { result: { format: StudyFormat; data: StudyResult } }) {
   const { t } = useLanguage();
   const data = result.data as Record<string, unknown>;
-  const title = typeof data.title === "string" ? data.title : "";
+  const title = typeof data['title'] === "string" ? data['title'] : "";
 
   if (result.format === "summary") {
-    const overview = typeof data.overview === "string" ? data.overview : "";
-    const points = (data.keyPoints as { heading: string; detail: string }[] | undefined) ?? [];
-    const quickReview = (data.quickReview as string[] | undefined) ?? [];
+    const overview = typeof data['overview'] === "string" ? data['overview'] : "";
+    const points = (data['keyPoints'] as { heading: string; detail: string }[] | undefined) ?? [];
+    const quickReview = (data['quickReview'] as string[] | undefined) ?? [];
     return (
       <div className="space-y-4">
         <h2 className="text-lg font-bold">{title}</h2>
@@ -442,7 +442,7 @@ function Result({ result }: { result: { format: StudyFormat; data: StudyResult }
   }
 
   if (result.format === "flashcards") {
-    const cards = (data.cards as { question: string; answer: string }[] | undefined) ?? [];
+    const cards = (data['cards'] as { question: string; answer: string }[] | undefined) ?? [];
     return (
       <div className="space-y-4">
         <h2 className="text-lg font-bold">{title}</h2>
@@ -460,9 +460,9 @@ function Result({ result }: { result: { format: StudyFormat; data: StudyResult }
     );
   }
 
-  const centralTopic = typeof data.centralTopic === "string" ? data.centralTopic : title;
+  const centralTopic = typeof data['centralTopic'] === "string" ? data['centralTopic'] : title;
   const nodes =
-    (data.nodes as { id: string; label: string; description?: string; parentId?: string }[] | undefined) ??
+    (data['nodes'] as { id: string; label: string; description?: string; parentId?: string }[] | undefined) ??
     [];
   return (
     <div className="space-y-4">
