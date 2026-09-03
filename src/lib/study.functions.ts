@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import type { FollowupResult, StudyResult } from "./study";
 
 const languageNames: Record<string, string> = {
   ar: "Modern Standard Arabic",
@@ -132,7 +133,7 @@ async function callGateway(params: {
   };
   const content = payload.choices?.[0]?.message?.content;
   if (typeof content !== "string") throw new Error("No usable result was generated");
-  return JSON.parse(content) as Record<string, unknown>;
+  return JSON.parse(content) as unknown;
 }
 
 export const generateStudyResource = createServerFn({ method: "POST" })
@@ -153,12 +154,12 @@ export const generateStudyResource = createServerFn({ method: "POST" })
       mindmap: "a mind map structure",
     } as const;
 
-    const result = await callGateway({
+    const result = (await callGateway({
       system: `You are a precise study assistant. Answer only in ${target}. Return JSON only.`,
       user: `Turn the following lesson into ${labels[data.format]}. Stay accurate and never add information that is not present in the lesson. Write all text in ${target}.\n\nLesson:\n${data.lesson}`,
       schemaName: `${data.format}_study_resource`,
       schema: schemas[data.format],
-    });
+    })) as StudyResult;
 
     return { format: data.format, data: result };
   });
@@ -182,12 +183,12 @@ export const generateFollowup = createServerFn({ method: "POST" })
       terms: "a list of the most important terms with definitions",
     } as const;
 
-    const result = await callGateway({
+    const result = (await callGateway({
       system: `You are a study assistant. Answer only in ${target}. Return JSON only.`,
       user: `Turn this lesson into ${labels[data.action]}. Do not add information beyond the lesson. Write all text in ${target}. Leave "options" as an empty array when multiple choice is not relevant.\n\n${data.lesson}`,
       schemaName: "followup_resource",
       schema: followupSchema,
-    });
+    })) as FollowupResult;
 
     return result;
   });
