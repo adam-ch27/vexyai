@@ -59,7 +59,7 @@ function Home() {
     return () => window.clearInterval(timer);
   }, [quotes.length]);
 
-  const quote = quotes[quoteIndex] ?? quotes[0];
+  const quote = quotes[quoteIndex] ?? quotes[0]!;
   const StartArrow = dir === "rtl" ? ArrowLeft : ArrowRight;
 
   return (
