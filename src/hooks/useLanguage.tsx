@@ -1,11 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { languageInfo, translate, type LanguageCode, type TranslationKey } from "@/lib/i18n";
+import { languageInfo, translateAny, type AnyKey, type LanguageCode } from "@/lib/i18n";
 
 type LanguageContextValue = {
   language: LanguageCode;
   dir: "rtl" | "ltr";
   setLanguage: (code: LanguageCode) => void;
-  t: (key: TranslationKey) => string;
+  t: (key: AnyKey) => string;
 };
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
@@ -33,7 +33,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<LanguageContextValue>(
-    () => ({ language, dir, setLanguage, t: (key: TranslationKey) => translate(language, key) }),
+    () => ({ language, dir, setLanguage, t: (key: AnyKey) => translateAny(language, key) }),
     [language, dir, setLanguage],
   );
 
