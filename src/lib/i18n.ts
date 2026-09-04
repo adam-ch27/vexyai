@@ -212,6 +212,15 @@ export function translate(language: LanguageCode, key: TranslationKey) {
   return translations[language]?.[key] ?? ar[key] ?? key;
 }
 
+export type AnyKey = TranslationKey | ExtraKey;
+
+export function translateAny(language: LanguageCode, key: AnyKey) {
+  const base = translations[language] as Record<string, string> | undefined;
+  if (base && key in base) return base[key] as string;
+  return translateExtra(language, key as ExtraKey);
+}
+
+
 export function languageInfo(code: LanguageCode) {
   return languages.find((language) => language.code === code) ?? languages[0];
 }
