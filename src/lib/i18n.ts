@@ -258,3 +258,141 @@ export const studyQuotes: Record<LanguageCode, { text: string; author: string }[
 export function nextQuoteIndex(current: number, total: number) {
   return (current + 1) % total;
 }
+
+/* ---------------- extended keys (v2 features) ---------------- */
+export type ExtraKey =
+  | "soon"
+  | "history"
+  | "newChat"
+  | "noHistory"
+  | "deleteChat"
+  | "untitled"
+  | "openHistory"
+  | "record"
+  | "recordingNow"
+  | "stopRecord"
+  | "transcribing"
+  | "micDenied"
+  | "attachHint"
+  | "reading"
+  | "extracted"
+  | "fileKindError"
+  | "otherFormats"
+  | "mapImageBtn"
+  | "mapImageLoading"
+  | "mapImageError"
+  | "downloadMap"
+  | "accountLead"
+  | "sessionsCount"
+  | "savedResources"
+  | "localOnly"
+  | "clearAll"
+  | "cleared"
+  | "emailUs"
+  | "responseTime"
+  | "backHome";
+
+type Extra = Record<ExtraKey, string>;
+
+const extras: Record<LanguageCode, Extra> = {
+  ar: {
+    soon: "قريبًا", history: "سجل المحادثات", newChat: "محادثة جديدة", noHistory: "لا توجد محادثات بعد",
+    deleteChat: "حذف المحادثة", untitled: "محادثة بدون عنوان", openHistory: "فتح سجل المحادثات",
+    record: "تسجيل صوتي", recordingNow: "جارٍ التسجيل…", stopRecord: "إيقاف وإرسال",
+    transcribing: "جارٍ تحويل الصوت إلى نص…", micDenied: "تعذر الوصول إلى الميكروفون",
+    attachHint: "PDF أو صورة أو نص", reading: "جارٍ قراءة الملف…", extracted: "تم استخراج نص الدرس",
+    fileKindError: "الملفات المدعومة: PDF وصور ونصوص",
+    otherFormats: "جرّب صيغة أخرى لنفس الدرس",
+    mapImageBtn: "أنشئ صورة للخريطة الذهنية", mapImageLoading: "جارٍ رسم الخريطة…",
+    mapImageError: "تعذر إنشاء صورة الخريطة", downloadMap: "تحميل الصورة",
+    accountLead: "كل ما يخص حسابك ومحادثاتك المحفوظة على هذا الجهاز.",
+    sessionsCount: "عدد المحادثات", savedResources: "الموارد المولّدة",
+    localOnly: "بياناتك محفوظة محليًا على جهازك فقط، ولا تُرسل إلى أي خادم.",
+    clearAll: "حذف كل السجل", cleared: "تم حذف السجل",
+    emailUs: "راسلنا", responseTime: "نرد عادة خلال 24 ساعة.", backHome: "العودة للرئيسية",
+  },
+  fr: {
+    soon: "Bientôt", history: "Historique", newChat: "Nouvelle conversation", noHistory: "Aucune conversation",
+    deleteChat: "Supprimer", untitled: "Conversation sans titre", openHistory: "Ouvrir l'historique",
+    record: "Enregistrement vocal", recordingNow: "Enregistrement…", stopRecord: "Arrêter et envoyer",
+    transcribing: "Transcription en cours…", micDenied: "Accès au micro refusé",
+    attachHint: "PDF, image ou texte", reading: "Lecture du fichier…", extracted: "Texte de la leçon extrait",
+    fileKindError: "Formats acceptés : PDF, images et texte",
+    otherFormats: "Essayez un autre format pour la même leçon",
+    mapImageBtn: "Générer l'image de la carte", mapImageLoading: "Dessin de la carte…",
+    mapImageError: "Impossible de générer l'image", downloadMap: "Télécharger l'image",
+    accountLead: "Tout sur votre compte et vos conversations enregistrées sur cet appareil.",
+    sessionsCount: "Conversations", savedResources: "Ressources générées",
+    localOnly: "Vos données restent en local sur votre appareil.",
+    clearAll: "Effacer l'historique", cleared: "Historique effacé",
+    emailUs: "Écrivez-nous", responseTime: "Réponse sous 24 h en général.", backHome: "Retour à l'accueil",
+  },
+  en: {
+    soon: "Coming soon", history: "Chat history", newChat: "New chat", noHistory: "No conversations yet",
+    deleteChat: "Delete", untitled: "Untitled chat", openHistory: "Open chat history",
+    record: "Voice recording", recordingNow: "Recording…", stopRecord: "Stop and send",
+    transcribing: "Transcribing audio…", micDenied: "Microphone access denied",
+    attachHint: "PDF, image or text", reading: "Reading file…", extracted: "Lesson text extracted",
+    fileKindError: "Supported files: PDF, images and text",
+    otherFormats: "Try another format for the same lesson",
+    mapImageBtn: "Generate mind map image", mapImageLoading: "Drawing the map…",
+    mapImageError: "Could not generate the image", downloadMap: "Download image",
+    accountLead: "Everything about your account and the chats saved on this device.",
+    sessionsCount: "Conversations", savedResources: "Generated resources",
+    localOnly: "Your data stays local on this device only.",
+    clearAll: "Clear history", cleared: "History cleared",
+    emailUs: "Email us", responseTime: "We usually reply within 24 hours.", backHome: "Back home",
+  },
+  de: {
+    soon: "Demnächst", history: "Chatverlauf", newChat: "Neuer Chat", noHistory: "Noch keine Unterhaltungen",
+    deleteChat: "Löschen", untitled: "Chat ohne Titel", openHistory: "Chatverlauf öffnen",
+    record: "Sprachaufnahme", recordingNow: "Aufnahme…", stopRecord: "Stoppen und senden",
+    transcribing: "Audio wird transkribiert…", micDenied: "Kein Zugriff auf das Mikrofon",
+    attachHint: "PDF, Bild oder Text", reading: "Datei wird gelesen…", extracted: "Lektionstext extrahiert",
+    fileKindError: "Unterstützt: PDF, Bilder und Text",
+    otherFormats: "Anderes Format für dieselbe Lektion",
+    mapImageBtn: "Mindmap-Bild erstellen", mapImageLoading: "Karte wird gezeichnet…",
+    mapImageError: "Bild konnte nicht erstellt werden", downloadMap: "Bild herunterladen",
+    accountLead: "Alles zu deinem Konto und den auf diesem Gerät gespeicherten Chats.",
+    sessionsCount: "Unterhaltungen", savedResources: "Erstellte Ressourcen",
+    localOnly: "Deine Daten bleiben lokal auf diesem Gerät.",
+    clearAll: "Verlauf löschen", cleared: "Verlauf gelöscht",
+    emailUs: "Schreib uns", responseTime: "Antwort meist innerhalb von 24 Stunden.", backHome: "Zur Startseite",
+  },
+  es: {
+    soon: "Próximamente", history: "Historial", newChat: "Nueva conversación", noHistory: "Aún no hay conversaciones",
+    deleteChat: "Eliminar", untitled: "Conversación sin título", openHistory: "Abrir historial",
+    record: "Grabación de voz", recordingNow: "Grabando…", stopRecord: "Detener y enviar",
+    transcribing: "Transcribiendo audio…", micDenied: "Sin acceso al micrófono",
+    attachHint: "PDF, imagen o texto", reading: "Leyendo archivo…", extracted: "Texto de la lección extraído",
+    fileKindError: "Formatos admitidos: PDF, imágenes y texto",
+    otherFormats: "Prueba otro formato con la misma lección",
+    mapImageBtn: "Generar imagen del mapa", mapImageLoading: "Dibujando el mapa…",
+    mapImageError: "No se pudo generar la imagen", downloadMap: "Descargar imagen",
+    accountLead: "Todo sobre tu cuenta y las conversaciones guardadas en este dispositivo.",
+    sessionsCount: "Conversaciones", savedResources: "Recursos generados",
+    localOnly: "Tus datos se guardan solo en este dispositivo.",
+    clearAll: "Borrar historial", cleared: "Historial borrado",
+    emailUs: "Escríbenos", responseTime: "Solemos responder en 24 horas.", backHome: "Volver al inicio",
+  },
+  pt: {
+    soon: "Em breve", history: "Histórico", newChat: "Nova conversa", noHistory: "Ainda sem conversas",
+    deleteChat: "Excluir", untitled: "Conversa sem título", openHistory: "Abrir histórico",
+    record: "Gravação de voz", recordingNow: "Gravando…", stopRecord: "Parar e enviar",
+    transcribing: "Transcrevendo áudio…", micDenied: "Sem acesso ao microfone",
+    attachHint: "PDF, imagem ou texto", reading: "Lendo arquivo…", extracted: "Texto da lição extraído",
+    fileKindError: "Formatos aceitos: PDF, imagens e texto",
+    otherFormats: "Experimente outro formato para a mesma lição",
+    mapImageBtn: "Gerar imagem do mapa", mapImageLoading: "Desenhando o mapa…",
+    mapImageError: "Não foi possível gerar a imagem", downloadMap: "Baixar imagem",
+    accountLead: "Tudo sobre sua conta e as conversas salvas neste dispositivo.",
+    sessionsCount: "Conversas", savedResources: "Recursos gerados",
+    localOnly: "Seus dados ficam apenas neste dispositivo.",
+    clearAll: "Limpar histórico", cleared: "Histórico limpo",
+    emailUs: "Fale conosco", responseTime: "Respondemos em até 24 horas.", backHome: "Voltar ao início",
+  },
+};
+
+export function translateExtra(language: LanguageCode, key: ExtraKey) {
+  return extras[language]?.[key] ?? extras.ar[key] ?? key;
+}
