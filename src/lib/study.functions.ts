@@ -192,3 +192,153 @@ export const generateFollowup = createServerFn({ method: "POST" })
 
     return result;
   });
+
+const MULTIMODAL_MODEL = "google/gemini-3.7-flash";
+const IMAGE_MODEL = "google/gemini-3-pro-image";
+
+async function callChat(body: Record<string, unknown>) {
+  const apiKey = process.env["LOVABLE_API_KEY"];
+  if (!apiKey) throw new Error("AI service is not configured");
+  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (response.status === 429) throw new Error("Rate limit reached, please try again shortly.");
+  if (response.status === 402) throw new Error("AI credits exhausted.");
+  if (!response.ok) throw new Error(`AI request failed (${response.status})`);
+  return (await response.json()) as {
+    choices?: { message?: { content?: string; images?: { image_url?: { url?: string } }[] } }[];
+  };
+}
+
+const dataUrlSchema = z
+  .string()
+  .max(9_000_000)
+  .refine((value) => value.startsWith("data:"), "expected a data URL");
+
+export const extractLessonText = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        dataUrl: dataUrlSchema,
+        mimeType: z.string().min(3).max(120),
+        filename: z.string().max(200).optional(),
+        language: languageSchema,
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    const isPdf = data.mimeType.includes("pdf");
+    const instruction =
+      "Extract the full readable study text from this document. Return plain text only, keep the original language of the document, keep headings and lists, and do not add commentary.";
+
+    const content = isPdf
+      ? [
+          { type: "text", text: instruction },
+          {
+            type: "file",
+            file: { filename: data.filename ?? "lesson.pdf", file_data: data.dataUrl },
+          },
+        ]
+      : [
+          { type: "text", text: instruction },
+          { type: "image_url", image_url: { url: data.dataUrl } },
+        ];
+
+    const payload = await callChat({
+      model: MULTIMODAL_MODEL,
+      messages: [{ role: "user", content }],
+    });
+    const text = payload.choices?.[0]?.message?.content;
+    if (typeof text !== "string" || !text.trim()) throw new Error("No text could be extracted");
+    return { text: text.trim() };
+  });
+
+export const transcribeLessonAudio = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        audio: z.string().min(100).max(9_000_000),
+        format: z.enum(["webm", "mp4", "m4a", "wav", "mp3", "ogg"]),
+        language: languageSchema,
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    const target = languageNames[data.language] ?? "Modern Standard Arabic";
+    const payload = await callChat({
+      model: MULTIMODAL_MODEL,
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: `Transcribe this recording word for word. Keep the spoken language; if it is unclear assume ${target}. Return only the transcription text.`,
+            },
+            {
+              type: "input_audio",
+              input_audio: { data: data.audio, format: data.format === "mp4" ? "m4a" : data.format },
+            },
+          ],
+        },
+      ],
+    });
+    const text = payload.choices?.[0]?.message?.content;
+    if (typeof text !== "string" || !text.trim()) throw new Error("No speech was recognised");
+    return { text: text.trim() };
+  });
+
+export const generateMindMapImage = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        centralTopic: z.string().min(1).max(200),
+        nodes: z
+          .array(z.object({ label: z.string().max(160), description: z.string().max(400).optional() }))
+          .min(1)
+          .max(14),
+        language: languageSchema,
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    const target = languageNames[data.language] ?? "Modern Standard Arabic";
+    const branches = data.nodes
+      .map((node, index) => `${index + 1}. ${node.label}${node.description ? ` — ${node.description}` : ""}`)
+      .join("\n");
+
+    const apiKey = process.env["LOVABLE_API_KEY"];
+    if (!apiKey) throw new Error("AI service is not configured");
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: IMAGE_MODEL,
+        messages: [
+          {
+            role: "user",
+            content: `Create a clean, highly organised mind map diagram (educational infographic, white background, soft indigo and gold palette, rounded boxes, clear curved connector lines, generous spacing, no clutter, flat vector style).
+Write every label exactly as given, in ${target}, with correct spelling and correct right-to-left shaping when the language is Arabic. Do not invent extra text.
+Central node: ${data.centralTopic}
+Branches:
+${branches}`,
+          },
+        ],
+        modalities: ["image", "text"],
+      }),
+    });
+
+    if (response.status === 429) throw new Error("Rate limit reached, please try again shortly.");
+    if (response.status === 402) throw new Error("AI credits exhausted.");
+    if (!response.ok) throw new Error(`Image request failed (${response.status})`);
+
+    const payload = (await response.json()) as {
+      choices?: { message?: { images?: { image_url?: { url?: string } }[] } }[];
+    };
+    const url = payload.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    if (!url) throw new Error("No image was generated");
+    return { image: url };
+  });
