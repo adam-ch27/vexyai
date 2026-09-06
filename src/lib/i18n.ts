@@ -299,7 +299,23 @@ export type ExtraKey =
   | "cleared"
   | "emailUs"
   | "responseTime"
-  | "backHome";
+  | "backHome"
+  | "suggestions"
+  | "moreIdeas"
+  | "quizHard"
+  | "trueFalse"
+  | "examples"
+  | "mistakes"
+  | "analogy"
+  | "studyPlan"
+  | "connections"
+  | "shortNote"
+  | "exam"
+  | "vocab"
+  | "builtBy"
+  | "footerLine"
+  | "openSidebar"
+  | "closeSidebar";
 
 type Extra = Record<ExtraKey, string>;
 
