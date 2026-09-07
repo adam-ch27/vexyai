@@ -513,56 +513,6 @@ function Chat() {
               </div>
             )}
 
-            {latest?.result && !generate.isPending && (
-              <div className="mt-8 space-y-6">
-                <div>
-                  <p className="mb-3 text-sm font-bold text-muted-foreground">{t("otherFormats")}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {starters
-                      .filter((item) => item.id !== latest.result?.format)
-                      .map(({ id, icon: Icon, title }) => (
-                        <button
-                          key={id}
-                          type="button"
-                          className="suggestion-chip"
-                          onClick={() => {
-                            setFormat(id);
-                            runGenerate(latest.request, id);
-                          }}
-                        >
-                          <Icon className="h-4 w-4" />
-                          {t(title)}
-                        </button>
-                      ))}
-                  </div>
-                </div>
-
-                <div>
-                  <p className="mb-3 text-sm font-bold text-muted-foreground">{t("followup")}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {followups.map(({ action, label, icon: Icon }) => (
-                      <button
-                        key={action}
-                        type="button"
-                        className="suggestion-chip"
-                        disabled={followup.isPending}
-                        onClick={() => followup.mutate({ lesson: latest.request, action })}
-                      >
-                        <Icon className="h-4 w-4" />
-                        {t(label)}
-                      </button>
-                    ))}
-                  </div>
-                  {followup.isPending && (
-                    <div className="mt-4 flex items-center gap-3 text-sm text-muted-foreground">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      {t("thinking")}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
             {followupResult && (
               <div className="assistant-bubble mt-6">
                 <h2 className="text-lg font-bold">{followupResult.title}</h2>
@@ -587,7 +537,62 @@ function Chat() {
               </div>
             )}
 
-            <div className="mt-10">
+            {latest?.result && !generate.isPending && (
+              <div className="suggestion-bar">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-bold text-muted-foreground">{t("otherFormats")}</span>
+                  {starters
+                    .filter((item) => item.id !== latest.result?.format)
+                    .map(({ id, icon: Icon, title }) => (
+                      <button
+                        key={id}
+                        type="button"
+                        className="suggestion-chip !py-2 !text-xs"
+                        onClick={() => {
+                          setFormat(id);
+                          runGenerate(latest.request, id);
+                        }}
+                      >
+                        <Icon className="h-3.5 w-3.5" />
+                        {t(title)}
+                      </button>
+                    ))}
+                </div>
+
+                <div className="mt-3 flex flex-wrap items-center gap-2 border-t pt-3">
+                  <span className="text-xs font-bold text-muted-foreground">{t("suggestions")}</span>
+                  {suggestionSet.map(({ action, label, icon: Icon }) => (
+                    <button
+                      key={label}
+                      type="button"
+                      className="suggestion-chip !py-2 !text-xs"
+                      disabled={followup.isPending}
+                      onClick={() => followup.mutate({ lesson: latest.request, action })}
+                    >
+                      <Icon className="h-3.5 w-3.5" />
+                      {t(label)}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    className="suggestion-chip !py-2 !text-xs"
+                    onClick={() => setSuggestionOffset((value) => value + 1)}
+                  >
+                    <Shuffle className="h-3.5 w-3.5" />
+                    {t("moreIdeas")}
+                  </button>
+                  {followup.isPending && (
+                    <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      {t("thinking")}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div className="mt-6">
+
               <div className="chat-composer">
                 <div className="mb-3 flex items-center gap-2 text-xs font-bold text-muted-foreground">
                   <span className="h-2 w-2 rounded-full bg-current" />
