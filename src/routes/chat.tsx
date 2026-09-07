@@ -85,12 +85,31 @@ const starters: { id: StudyFormat; icon: typeof FileText; title: AnyKey; desc: A
   { id: "mindmap", icon: Network, title: "mindmapTitle", desc: "mindmapDesc" },
 ];
 
-const followups: { action: FollowupAction; label: AnyKey; icon: typeof Brain }[] = [
+const followupPool: { action: FollowupAction; label: AnyKey; icon: typeof Brain }[] = [
   { action: "quiz", label: "quiz", icon: Brain },
+  { action: "quiz", label: "quizHard", icon: Brain },
+  { action: "quiz", label: "trueFalse", icon: Check },
+  { action: "quiz", label: "exam", icon: Check },
   { action: "assessment", label: "assessment", icon: Check },
+  { action: "assessment", label: "studyPlan", icon: Layers3 },
+  { action: "assessment", label: "mistakes", icon: RotateCcw },
+  { action: "assessment", label: "connections", icon: Network },
   { action: "childExplain", label: "childExplain", icon: Sparkles },
+  { action: "childExplain", label: "analogy", icon: Sparkles },
+  { action: "childExplain", label: "examples", icon: Sparkles },
+  { action: "childExplain", label: "shortNote", icon: FileText },
   { action: "terms", label: "terms2", icon: FileText },
+  { action: "terms", label: "vocab", icon: FileText },
 ];
+
+function pickFollowups(offset: number) {
+  const picks: typeof followupPool = [];
+  for (let step = 0; picks.length < 5 && step < followupPool.length; step += 1) {
+    const item = followupPool[(offset * 3 + step * 5) % followupPool.length]!;
+    if (!picks.some((existing) => existing.label === item.label)) picks.push(item);
+  }
+  return picks;
+}
 
 function readAsDataUrl(file: Blob) {
   return new Promise<string>((resolve, reject) => {
