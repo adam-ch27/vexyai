@@ -134,6 +134,7 @@ function Chat() {
   const [followupResult, setFollowupResult] = useState<FollowupResult | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [recording, setRecording] = useState(false);
+  const [suggestionOffset, setSuggestionOffset] = useState(0);
 
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
@@ -382,6 +383,10 @@ function Chat() {
 
   const latest = turns[turns.length - 1];
   const busy = generate.isPending || extract.isPending || transcribe.isPending;
+  const suggestionSet = useMemo(
+    () => pickFollowups(turns.length + suggestionOffset),
+    [turns.length, suggestionOffset],
+  );
 
   return (
     <div dir={dir} className="chat-shell min-h-screen text-foreground">
@@ -392,7 +397,7 @@ function Chat() {
               variant="outline"
               aria-label={t("openHistory")}
               onClick={() => setSidebarOpen(true)}
-              className="h-10 w-10 rounded-full p-0 lg:hidden"
+              className="h-10 w-10 rounded-full p-0"
             >
               <PanelLeft className="h-4 w-4" />
             </Button>
