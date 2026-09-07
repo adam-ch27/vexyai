@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -22,6 +22,7 @@ import {
   PanelLeft,
   RotateCcw,
   Send,
+  Shuffle,
   Sparkles,
   Square,
   Trash2,
@@ -85,12 +86,31 @@ const starters: { id: StudyFormat; icon: typeof FileText; title: AnyKey; desc: A
   { id: "mindmap", icon: Network, title: "mindmapTitle", desc: "mindmapDesc" },
 ];
 
-const followups: { action: FollowupAction; label: AnyKey; icon: typeof Brain }[] = [
+const followupPool: { action: FollowupAction; label: AnyKey; icon: typeof Brain }[] = [
   { action: "quiz", label: "quiz", icon: Brain },
+  { action: "quiz", label: "quizHard", icon: Brain },
+  { action: "quiz", label: "trueFalse", icon: Check },
+  { action: "quiz", label: "exam", icon: Check },
   { action: "assessment", label: "assessment", icon: Check },
+  { action: "assessment", label: "studyPlan", icon: Layers3 },
+  { action: "assessment", label: "mistakes", icon: RotateCcw },
+  { action: "assessment", label: "connections", icon: Network },
   { action: "childExplain", label: "childExplain", icon: Sparkles },
+  { action: "childExplain", label: "analogy", icon: Sparkles },
+  { action: "childExplain", label: "examples", icon: Sparkles },
+  { action: "childExplain", label: "shortNote", icon: FileText },
   { action: "terms", label: "terms2", icon: FileText },
+  { action: "terms", label: "vocab", icon: FileText },
 ];
+
+function pickFollowups(offset: number) {
+  const picks: typeof followupPool = [];
+  for (let step = 0; picks.length < 5 && step < followupPool.length; step += 1) {
+    const item = followupPool[(offset * 3 + step * 5) % followupPool.length]!;
+    if (!picks.some((existing) => existing.label === item.label)) picks.push(item);
+  }
+  return picks;
+}
 
 function readAsDataUrl(file: Blob) {
   return new Promise<string>((resolve, reject) => {
@@ -114,6 +134,7 @@ function Chat() {
   const [followupResult, setFollowupResult] = useState<FollowupResult | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [recording, setRecording] = useState(false);
+  const [suggestionOffset, setSuggestionOffset] = useState(0);
 
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
@@ -362,6 +383,10 @@ function Chat() {
 
   const latest = turns[turns.length - 1];
   const busy = generate.isPending || extract.isPending || transcribe.isPending;
+  const suggestionSet = useMemo(
+    () => pickFollowups(turns.length + suggestionOffset),
+    [turns.length, suggestionOffset],
+  );
 
   return (
     <div dir={dir} className="chat-shell min-h-screen text-foreground">
@@ -372,7 +397,7 @@ function Chat() {
               variant="outline"
               aria-label={t("openHistory")}
               onClick={() => setSidebarOpen(true)}
-              className="h-10 w-10 rounded-full p-0 lg:hidden"
+              className="h-10 w-10 rounded-full p-0"
             >
               <PanelLeft className="h-4 w-4" />
             </Button>
@@ -494,56 +519,6 @@ function Chat() {
               </div>
             )}
 
-            {latest?.result && !generate.isPending && (
-              <div className="mt-8 space-y-6">
-                <div>
-                  <p className="mb-3 text-sm font-bold text-muted-foreground">{t("otherFormats")}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {starters
-                      .filter((item) => item.id !== latest.result?.format)
-                      .map(({ id, icon: Icon, title }) => (
-                        <button
-                          key={id}
-                          type="button"
-                          className="suggestion-chip"
-                          onClick={() => {
-                            setFormat(id);
-                            runGenerate(latest.request, id);
-                          }}
-                        >
-                          <Icon className="h-4 w-4" />
-                          {t(title)}
-                        </button>
-                      ))}
-                  </div>
-                </div>
-
-                <div>
-                  <p className="mb-3 text-sm font-bold text-muted-foreground">{t("followup")}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {followups.map(({ action, label, icon: Icon }) => (
-                      <button
-                        key={action}
-                        type="button"
-                        className="suggestion-chip"
-                        disabled={followup.isPending}
-                        onClick={() => followup.mutate({ lesson: latest.request, action })}
-                      >
-                        <Icon className="h-4 w-4" />
-                        {t(label)}
-                      </button>
-                    ))}
-                  </div>
-                  {followup.isPending && (
-                    <div className="mt-4 flex items-center gap-3 text-sm text-muted-foreground">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      {t("thinking")}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
             {followupResult && (
               <div className="assistant-bubble mt-6">
                 <h2 className="text-lg font-bold">{followupResult.title}</h2>
@@ -568,7 +543,62 @@ function Chat() {
               </div>
             )}
 
-            <div className="mt-10">
+            {latest?.result && !generate.isPending && (
+              <div className="suggestion-bar">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-bold text-muted-foreground">{t("otherFormats")}</span>
+                  {starters
+                    .filter((item) => item.id !== latest.result?.format)
+                    .map(({ id, icon: Icon, title }) => (
+                      <button
+                        key={id}
+                        type="button"
+                        className="suggestion-chip !py-2 !text-xs"
+                        onClick={() => {
+                          setFormat(id);
+                          runGenerate(latest.request, id);
+                        }}
+                      >
+                        <Icon className="h-3.5 w-3.5" />
+                        {t(title)}
+                      </button>
+                    ))}
+                </div>
+
+                <div className="mt-3 flex flex-wrap items-center gap-2 border-t pt-3">
+                  <span className="text-xs font-bold text-muted-foreground">{t("suggestions")}</span>
+                  {suggestionSet.map(({ action, label, icon: Icon }) => (
+                    <button
+                      key={label}
+                      type="button"
+                      className="suggestion-chip !py-2 !text-xs"
+                      disabled={followup.isPending}
+                      onClick={() => followup.mutate({ lesson: latest.request, action })}
+                    >
+                      <Icon className="h-3.5 w-3.5" />
+                      {t(label)}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    className="suggestion-chip !py-2 !text-xs"
+                    onClick={() => setSuggestionOffset((value) => value + 1)}
+                  >
+                    <Shuffle className="h-3.5 w-3.5" />
+                    {t("moreIdeas")}
+                  </button>
+                  {followup.isPending && (
+                    <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      {t("thinking")}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div className="mt-6">
+
               <div className="chat-composer">
                 <div className="mb-3 flex items-center gap-2 text-xs font-bold text-muted-foreground">
                   <span className="h-2 w-2 rounded-full bg-current" />

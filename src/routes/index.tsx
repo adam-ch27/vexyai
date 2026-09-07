@@ -1,27 +1,11 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  ArrowLeft,
-  ArrowRight,
-  BookOpen,
-  Headphones,
-  Info,
-  Menu,
-  Quote,
-  ShieldCheck,
-  Sparkles,
-  UserRound,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, Quote, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { LanguageMenu } from "@/components/LanguageMenu";
+import { BrandLogo } from "@/components/BrandLogo";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
 import { useLanguage } from "@/hooks/useLanguage";
 import { nextQuoteIndex, studyQuotes } from "@/lib/i18n";
 
@@ -39,6 +23,8 @@ export const Route = createFileRoute("/")({
         property: "og:description",
         content: "حوّل أي درس إلى ملخص أو بطاقات أو خريطة ذهنية في ثوانٍ.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Home,
@@ -69,66 +55,8 @@ function Home() {
       <div className="orb orb-two" />
 
       <header className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-5 py-6 lg:px-8">
-        <Link to="/" className="flex items-center gap-3">
-          <span className="brand-mark">
-            <BookOpen className="h-5 w-5" />
-          </span>
-          <span className="text-lg font-extrabold tracking-tight">
-            StudyWise <span className="brand-accent">AI</span>
-          </span>
-        </Link>
-
-        <div className="flex items-center gap-2">
-          <LanguageMenu />
-          <Button
-            variant="ghost"
-            className="hidden rounded-full px-5 text-sm font-bold sm:inline-flex"
-          >
-            {t("login")}
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                aria-label={t("openMenu")}
-                className="h-10 w-10 rounded-full bg-card/70 p-0 shadow-sm"
-              >
-                <Menu className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2">
-              <DropdownMenuItem className="gap-2 rounded-xl py-3">
-                <UserRound className="h-4 w-4" />
-                {t("account")}
-              </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2 rounded-xl py-3">
-                <Headphones className="h-4 w-4" />
-                {t("support")}
-              </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2 rounded-xl py-3">
-                <Info className="h-4 w-4" />
-                {t("about")}
-              </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2 rounded-xl py-3">
-                <Sparkles className="h-4 w-4" />
-                {t("faq")}
-              </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2 rounded-xl py-3">
-                <Headphones className="h-4 w-4" />
-                {t("helpCenter")}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="gap-2 rounded-xl py-3">
-                <ShieldCheck className="h-4 w-4" />
-                {t("privacy")}
-              </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2 rounded-xl py-3">
-                <ShieldCheck className="h-4 w-4" />
-                {t("terms")}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+        <BrandLogo />
+        <SiteHeader />
       </header>
 
       <section className="relative z-10 mx-auto flex min-h-[calc(100vh-92px)] max-w-6xl flex-col items-center justify-center px-5 pb-16 pt-10 text-center lg:px-8">
@@ -155,7 +83,7 @@ function Home() {
           {t("heroSub")}
         </p>
 
-        <Link to="/chat" className="mt-10">
+        <Link to="/chat" search={{ c: undefined }} className="mt-10">
           <Button className="cta-button h-16 gap-3 rounded-full px-8 text-base font-extrabold sm:px-10 sm:text-lg">
             {t("start")}
             <StartArrow className="h-5 w-5" />
@@ -178,6 +106,10 @@ function Home() {
           <span>{t("perk3")}</span>
         </div>
       </section>
+
+      <div className="relative z-10">
+        <SiteFooter />
+      </div>
     </main>
   );
 }

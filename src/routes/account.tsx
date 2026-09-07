@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BrandLogo } from "@/components/BrandLogo";
 import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useConversations } from "@/lib/history";
 
@@ -118,6 +119,8 @@ function Account() {
           ))}
         </div>
       </section>
+
+      <SiteFooter />
     </main>
   );
 }

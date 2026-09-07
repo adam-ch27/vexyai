@@ -320,8 +320,11 @@ export const generateMindMapImage = createServerFn({ method: "POST" })
         messages: [
           {
             role: "user",
-            content: `Create a clean, highly organised mind map diagram (educational infographic, white background, soft indigo and gold palette, rounded boxes, clear curved connector lines, generous spacing, no clutter, flat vector style).
-Write every label exactly as given, in ${target}, with correct spelling and correct right-to-left shaping when the language is Arabic. Do not invent extra text.
+            content: `Design a vibrant, lively mind map poster in the style of a premium Canva infographic template.
+Style: colourful flat-vector illustration, bright but harmonious palette (indigo, gold, teal, coral, mint) on a soft off-white background, rounded pill and card shapes with subtle shadows, thick smooth curved connector lines in different colours, playful accents (small dots, stars, sparkles, ribbons).
+Every branch must carry its own simple flat icon or small illustration that visually matches its meaning (book, lightbulb, atom, gear, map, chart, plant, clock...), plus a distinct colour.
+The central topic sits in the middle inside a bold, decorated badge, with branches radiating outwards in a balanced, well-spaced, highly organised layout. Clean typography hierarchy: large bold central title, medium bold branch labels, small light description text. No clutter, no overlapping text, plenty of breathing room.
+Write every label exactly as given, in ${target}, with correct spelling and correct right-to-left shaping when the language is Arabic. Do not invent extra text or add any words that are not listed below.
 Central node: ${data.centralTopic}
 Branches:
 ${branches}`,

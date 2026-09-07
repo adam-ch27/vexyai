@@ -1,7 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, Mail } from "lucide-react";
+import { ArrowLeft, ArrowRight, Mail, Sparkles } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
 import { useLanguage } from "@/hooks/useLanguage";
 import { contactEmail, infoPage, infoTopics, type InfoTopic } from "@/lib/site-content";
 
@@ -53,6 +54,15 @@ function InfoRoute() {
         <h1 className="text-3xl font-black tracking-tight sm:text-4xl">{page.title}</h1>
         <p className="mt-4 text-base leading-8 text-muted-foreground">{page.lead}</p>
 
+        <div className="mt-6 flex flex-wrap gap-2">
+          {page.highlights.map((item) => (
+            <span key={item} className="highlight-pill">
+              <Sparkles className="h-3.5 w-3.5" />
+              {item}
+            </span>
+          ))}
+        </div>
+
         <div className="mt-8 space-y-4">
           {page.sections.map((section) => (
             <article key={section.heading} className="assistant-bubble">
@@ -76,6 +86,8 @@ function InfoRoute() {
           </a>
         </div>
       </section>
+
+      <SiteFooter />
     </main>
   );
 }
